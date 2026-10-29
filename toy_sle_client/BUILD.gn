@@ -1,0 +1,91 @@
+# Copyright (c) 2026 自律哨兵.
+#
+# Licensed under the GNU Affero General Public License, Version 3.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.gnu.org/licenses/agpl-3.0.txt
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+static_library("zhwl_app") {
+    sources = [  
+        #"iot_ex/hal_iot_gpio_ex.c", 
+        "app.c",
+        #"touch.c"
+        "qrcodegen/qrcodegen.c",
+        "mpu6050/imu.c",
+        "mpu6050/mpu6050.c",
+        
+        # v23.0：毫米波雷达 UART2 驱动
+        "radar_uart.c",
+        # v23.0：WiFi STA + AT 配网 + MQTT（移植自 audio_tcp_client/lcd_wave_server）
+        "wifi_mqtt.c",
+    ]
+
+    include_dirs = [
+        "iot_ex",
+        "qrcodegen",
+        "mpu6050",
+            
+        #"//device/soc/hisilicon/hi3861v100/sdk_liteos/include",  #\hi_spi.h"  
+
+        "//usr/lib/gcc/x86_64-linux-gnu/9/include", #limits.h"
+
+        "//commonlibrary/utils_lite/include",
+        "//kernel/liteos_m/kal/cmsis", 
+        "//base/iothardware/peripheral/interfaces/inner_api",   ## iot_i2c.h
+
+        "//device/soc/hisilicon/ws63v100/sdkv102/include/driver", ## i2c.h, spi.h
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/driver/i2c", ## i2c.c" 
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/driver/spi", ## spi.c"
+
+        "//device/soc/hisilicon/ws63v100/adapter/hals/iot_hardware/wifiiot_lite", ##/hal_iot_uart.c
+      
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal",
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/uart",
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/gpio",
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/i2c",
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/spi",
+
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/chips/ws63/porting/gpio",
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/chips/ws63/porting/i2c",
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/chips/ws63/porting/uart",
+ 
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/adapter/ohos_3.2", # iot_i2c.c
+
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/gpio/v150",  
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/chips/ws63/rom/drivers/chips/ws63/porting/pinctrl",
+
+        #"//third_party/cJSON/",  
+        "//device/soc/hisilicon/ws63v100/sdkv102/open_source/cjson/cjson",   
+
+        # sle
+        "//base/startup/init/interfaces/innerkits/include",  
+        "//device/soc/hisilicon/ws63v100/sdkv102/include/middleware/services/bts/sle",
+        "//foundation/communication/sle",
+        "//device/soc/hisilicon/ws63v100/sdkv102/kernel/osal/include/debug",
+        "//device/soc/hisilicon/ws63v100/sdkv102/kernel/osal/include/memory",
+        "//device/soc/hisilicon/ws63v100/sdkv102/kernel/osal/include/schedule",   
+
+        # #include "soc_osal.h"
+        "//device/soc/hisilicon/ws63v100/sdkv102/kernel/osal/include",
+
+        # hal_spi.h
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/spi", 
+        #"//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/spi/hal_spi.h
+
+        # spi_porting.h
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/chips/ws63/porting/spi", 
+        # hal_spi_v151_regs_def.hs
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/spi/v151",
+        #"//device/soc/hisilicon/ws63v100/sdkv102/drivers/drivers/hal/spi/v151/hal_spi_v151.c
+        
+        # dma_porting.h
+        "//device/soc/hisilicon/ws63v100/sdkv102/drivers/chips/ws63/porting/dma", 
+    ]
+}

@@ -1,0 +1,1983 @@
+<!--
+  Copyright (c) 2026 自律哨兵.
+
+  Licensed under the GNU Affero General Public License, Version 3.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.gnu.org/licenses/agpl-3.0.txt
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>赛博自律哨兵</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #0b0e1a;
+            color: #e8edf5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(30, 60, 120, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(80, 30, 120, 0.20) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(10, 80, 100, 0.20) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .app {
+            max-width: 420px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ============ 页面容器 ============ */
+        .page {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px 12px 116px;
+        }
+        .page.active {
+            display: flex;
+        }
+
+        /* ============ 连接控制区（沿用原样式） ============ */
+        .control-bar {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+        .control-bar select,
+        .control-bar button {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e8edf5;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            outline: none;
+            flex: 1 1 auto;
+            min-width: 80px;
+        }
+        .control-bar button {
+            cursor: pointer;
+            background: rgba(100, 180, 255, 0.15);
+            border-color: rgba(100, 180, 255, 0.2);
+            font-weight: 500;
+            flex: 0 1 auto;
+        }
+        .control-bar button:active {
+            transform: scale(0.95);
+        }
+        .control-bar .conn-status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-left: auto;
+        }
+
+        /* ============ 头部 ============ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px 8px 6px;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #a0c4ff, #7aa9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .time-badge {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        /* ============ 卡片（沿用原样式） ============ */
+        .card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            padding: 18px 18px 20px;
+        }
+        .card-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.45);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ============ 三指标（沿用原样式） ============ */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 14px 6px 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card:active {
+            transform: scale(0.96);
+        }
+        .metric-card .icon-wrap {
+            font-size: 22px;
+            margin-bottom: 6px;
+            display: block;
+            line-height: 1;
+        }
+        .metric-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        .metric-card .value .unit {
+            font-size: 14px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.4);
+            margin-left: 2px;
+        }
+        .metric-card .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+        .metric-card.breath .value { color: #6dd5ed; }
+        .metric-card.breath .icon-wrap { color: #6dd5ed; }
+        .metric-card.breath .glow { background: radial-gradient(circle at 50% 30%, rgba(109, 213, 237, 0.15), transparent 70%); }
+        .metric-card.heart .value { color: #ff6b8a; }
+        .metric-card.heart .icon-wrap { color: #ff6b8a; }
+        .metric-card.heart .glow { background: radial-gradient(circle at 50% 30%, rgba(255, 107, 138, 0.15), transparent 70%); }
+        .metric-card.sleep .value { color: #b388ff; }
+        .metric-card.sleep .icon-wrap { color: #b388ff; }
+        .metric-card.sleep .glow { background: radial-gradient(circle at 50% 30%, rgba(179, 136, 255, 0.15), transparent 70%); }
+        .metric-card .glow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 80px;
+            border-radius: 50%;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* ============ 睡眠状态（沿用原样式） ============ */
+        .sleep-status {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .sleep-status .status-label { font-size: 14px; color: rgba(255, 255, 255, 0.6); }
+        .sleep-status .status-value {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sleep-status .status-value .indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        .sleep-status .status-value .indicator.deep { background: #b388ff; box-shadow: 0 0 12px rgba(179, 136, 255, 0.5); }
+        .sleep-status .status-value .indicator.light { background: #6dd5ed; box-shadow: 0 0 12px rgba(109, 213, 237, 0.5); }
+        .sleep-status .status-value .indicator.rem { background: #ffb74d; box-shadow: 0 0 12px rgba(255, 183, 77, 0.5); }
+        .sleep-status .status-value .indicator.awake { background: #ff6b8a; box-shadow: 0 0 12px rgba(255, 107, 138, 0.5); }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.4); opacity: 1; }
+        }
+
+        /* ============ 报告（沿用原样式） ============ */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 2px;
+        }
+        .report-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 14px 12px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background 0.2s;
+        }
+        .report-item:active { background: rgba(255, 255, 255, 0.07); }
+        .report-item .r-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .report-item .r-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e8edf5;
+            letter-spacing: 0.2px;
+        }
+        .report-item .r-value .r-unit {
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.35);
+            margin-left: 4px;
+        }
+        .report-item .r-sub {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 4px;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.2);
+            padding: 12px 0 4px;
+            letter-spacing: 0.3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 4px;
+        }
+
+        /* ============ 底部 Tab 导航（新增） ============ */
+        .tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 420px;
+            background: rgba(13, 16, 32, 0.90);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 11px;
+            letter-spacing: 0.3px;
+            padding: 4px 0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s;
+            user-select: none;
+        }
+        .tab .icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 2px;
+            transition: transform 0.2s;
+        }
+        .tab:active .icon { transform: scale(0.85); }
+        .tab.active {
+            color: #a0c4ff;
+            background: rgba(100, 180, 255, 0.08);
+        }
+        .tab.active .icon { filter: drop-shadow(0 0 8px rgba(122, 169, 255, 0.8)); }
+
+        /* ============ 首页 Hero（新增） ============ */
+        .hero {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            padding: 28px 20px 24px;
+            text-align: center;
+            background:
+                radial-gradient(ellipse at 50% -20%, rgba(122, 169, 255, 0.28) 0%, transparent 60%),
+                radial-gradient(ellipse at 90% 110%, rgba(255, 107, 138, 0.12) 0%, transparent 55%),
+                linear-gradient(160deg, rgba(30, 42, 84, 0.55), rgba(16, 20, 40, 0.6));
+            border: 1px solid rgba(122, 169, 255, 0.18);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        .hero .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            color: rgba(160, 196, 255, 0.9);
+            background: rgba(122, 169, 255, 0.1);
+            border: 1px solid rgba(122, 169, 255, 0.22);
+            padding: 5px 12px;
+            border-radius: 30px;
+            margin-bottom: 14px;
+        }
+        .hero .badge .pulse {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #6dd5ed;
+            box-shadow: 0 0 10px rgba(109, 213, 237, 0.9);
+            animation: pulse-dot 1.6s ease-in-out infinite;
+        }
+        .hero h2 {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #e8edf5 10%, #a0c4ff 50%, #b388ff 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(122, 169, 255, 0.25);
+        }
+        .hero .slogan {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.55);
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+        }
+        .hero .device {
+            width: 132px;
+            height: 168px;
+            margin: 20px auto 6px;
+            position: relative;
+        }
+        .hero .device .shell {
+            position: absolute;
+            inset: 0;
+            border-radius: 26px;
+            background: linear-gradient(160deg, rgba(46, 54, 96, 0.9), rgba(20, 24, 46, 0.95));
+            border: 1.5px solid rgba(160, 196, 255, 0.35);
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.25), 0 18px 40px rgba(0, 0, 0, 0.5), inset 0 0 24px rgba(122, 169, 255, 0.12);
+        }
+        .hero .device .screen {
+            position: absolute;
+            top: 16px; left: 12px; right: 12px; bottom: 34px;
+            border-radius: 14px;
+            background: linear-gradient(170deg, rgba(20, 26, 52, 0.95), rgba(10, 13, 28, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            overflow: hidden;
+        }
+        .hero .device .screen::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(122, 169, 255, 0.10), transparent 60%);
+        }
+        .hero .device .screen .scr-time {
+            font-size: 30px;
+            font-weight: 700;
+            color: #a0c4ff;
+            letter-spacing: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+        .hero .device .screen .scr-timer {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.65);
+            letter-spacing: 1px;
+        }
+        .hero .device .screen .scr-emoji {
+            font-size: 22px;
+            filter: drop-shadow(0 0 8px rgba(255, 183, 77, 0.6));
+        }
+        .hero .device .key {
+            position: absolute;
+            bottom: 12px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #8fa4d8, #3a4366 70%);
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+        .hero .device .key.k1 { left: 24px; }
+        .hero .device .key.k2 { left: 49px; }
+        .hero .device .key.k3 { right: 24px; }
+        .hero .device .ring {
+            position: absolute;
+            inset: -14px;
+            border-radius: 34px;
+            border: 1px dashed rgba(122, 169, 255, 0.22);
+            animation: spin-ring 24s linear infinite;
+        }
+        @keyframes spin-ring {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .hero .stats-strip {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .hero .stats-strip .s-item .s-num {
+            font-size: 17px;
+            font-weight: 700;
+            color: #e8edf5;
+        }
+        .hero .stats-strip .s-item .s-num em {
+            font-style: normal;
+            color: #ffb74d;
+        }
+        .hero .stats-strip .s-item .s-lab {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+        }
+
+        /* ============ 双模式卡片（新增） ============ */
+        .dual-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .mode-card {
+            border-radius: 22px;
+            padding: 16px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            position: relative;
+            overflow: hidden;
+        }
+        .mode-card.day {
+            background: linear-gradient(165deg, rgba(255, 183, 77, 0.10), rgba(255, 255, 255, 0.02));
+        }
+        .mode-card.night {
+            background: linear-gradient(165deg, rgba(179, 136, 255, 0.12), rgba(255, 255, 255, 0.02));
+        }
+        .mode-card .m-icon { font-size: 26px; }
+        .mode-card .m-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .mode-card.day .m-title { color: #ffb74d; }
+        .mode-card.night .m-title { color: #b388ff; }
+        .mode-card .m-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+            margin-top: 6px;
+        }
+        .mode-card .m-tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-top: 10px;
+            margin-right: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .mode-card.day .m-tag.hl { color: #ffb74d; border-color: rgba(255, 183, 77, 0.3); }
+        .mode-card.night .m-tag.hl { color: #b388ff; border-color: rgba(179, 136, 255, 0.3); }
+
+        /* ============ 技术亮点（新增） ============ */
+        .tech-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .tech-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .tech-item .t-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            flex-shrink: 0;
+        }
+        .tech-item.t-radar .t-icon { background: rgba(109, 213, 237, 0.12); }
+        .tech-item.t-link .t-icon { background: rgba(122, 169, 255, 0.12); }
+        .tech-item.t-sec .t-icon { background: rgba(255, 107, 138, 0.12); }
+        .tech-item .t-body .t-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e8edf5;
+        }
+        .tech-item .t-body .t-desc {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.55;
+            margin-top: 3px;
+        }
+        .tech-item .t-body .t-metrics {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 7px;
+        }
+        .tech-item .t-body .t-metrics span {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        /* ============ CTA 按钮（新增） ============ */
+        .cta-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .cta {
+            border: none;
+            outline: none;
+            cursor: pointer;
+            border-radius: 22px;
+            padding: 15px 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.5px;
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+        .cta:active { transform: scale(0.96); }
+        .cta-primary {
+            background: linear-gradient(135deg, #6fa8ff, #7aa9ff);
+            box-shadow: 0 8px 24px rgba(122, 169, 255, 0.35);
+        }
+        .cta-ghost {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e8edf5;
+        }
+
+        /* ============ 在线好友（新增） ============ */
+        .friends-summary {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: linear-gradient(150deg, rgba(109, 213, 237, 0.10), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(109, 213, 237, 0.18);
+        }
+        .friends-summary .fs-ring {
+            position: relative;
+            width: 58px;
+            height: 58px;
+            flex-shrink: 0;
+        }
+        .friends-summary .fs-ring svg { transform: rotate(-90deg); }
+        .friends-summary .fs-ring .fs-num {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            font-weight: 700;
+            color: #6dd5ed;
+        }
+        .friends-summary .fs-body .fs-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .friends-summary .fs-body .fs-sub {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.45);
+            margin-top: 4px;
+        }
+        .friends-summary .fs-body .fs-sub strong { color: #6dd5ed; font-weight: 600; }
+
+        .friend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .friend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.045);
+        }
+        .friend-item.me {
+            border-color: rgba(122, 169, 255, 0.25);
+            background: linear-gradient(150deg, rgba(122, 169, 255, 0.08), rgba(255, 255, 255, 0.02));
+        }
+        .friend-item .avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 23px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            position: relative;
+        }
+        .friend-item .avatar .dot-online {
+            position: absolute;
+            right: -2px;
+            bottom: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #141a33;
+            background: #2ee6a8;
+            box-shadow: 0 0 8px rgba(46, 230, 168, 0.7);
+        }
+        .friend-item .avatar .dot-online.off {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: none;
+        }
+        .friend-item .f-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .friend-item .f-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .friend-item .f-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .friend-item .f-name .me-tag {
+            font-size: 9.5px;
+            font-weight: 500;
+            color: #a0c4ff;
+            background: rgba(122, 169, 255, 0.12);
+            border: 1px solid rgba(122, 169, 255, 0.25);
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+            vertical-align: 1px;
+        }
+        .friend-item .f-streak {
+            font-size: 11px;
+            color: #ffb74d;
+            background: rgba(255, 183, 77, 0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+        .friend-item .f-sub {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+        .friend-item .f-sub .f-sleep { white-space: nowrap; }
+        .friend-item .f-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 14px;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.65);
+        }
+        .friend-item .f-status.live { color: #2ee6a8; border-color: rgba(46, 230, 168, 0.3); }
+        .friend-item .f-status.focus { color: #6dd5ed; border-color: rgba(109, 213, 237, 0.3); }
+        .friend-item .f-status.sleep { color: #b388ff; border-color: rgba(179, 136, 255, 0.3); }
+        .friend-item .f-status.off { color: rgba(255, 255, 255, 0.3); }
+
+        .group-progress {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .group-progress .gp-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 7px;
+        }
+        .group-progress .gp-head strong { color: #6dd5ed; font-weight: 600; }
+        .group-progress .gp-bar {
+            height: 7px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+        }
+        .group-progress .gp-bar span {
+            display: block;
+            height: 100%;
+            border-radius: 7px;
+            background: linear-gradient(90deg, #6dd5ed, #7aa9ff, #b388ff);
+            box-shadow: 0 0 12px rgba(109, 213, 237, 0.5);
+            transition: width 0.8s ease;
+        }
+
+        /* ============ 自律奖励（新增） ============ */
+        .me-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: linear-gradient(150deg, rgba(179, 136, 255, 0.12), rgba(122, 169, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(179, 136, 255, 0.22);
+        }
+        .me-card .pixel-avatar {
+            width: 76px;
+            height: 76px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 6px 16px rgba(122, 169, 255, 0.35));
+        }
+        .me-card .me-info { flex: 1; min-width: 0; }
+        .me-card .me-name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .me-card .me-level {
+            display: inline-block;
+            font-size: 10.5px;
+            color: #ffb74d;
+            background: rgba(255, 183, 77, 0.12);
+            border: 1px solid rgba(255, 183, 77, 0.28);
+            padding: 2px 9px;
+            border-radius: 12px;
+            margin-top: 5px;
+        }
+        .me-card .me-streak {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 6px;
+        }
+        .me-card .me-streak strong { color: #ffb74d; }
+        .me-card .me-coins {
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .me-card .me-coins .mc-num {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffb74d;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 18px rgba(255, 183, 77, 0.4);
+        }
+        .me-card .me-coins .mc-lab {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+            margin-top: 2px;
+        }
+
+        .reward-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .reward-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            padding: 13px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.045);
+        }
+        .reward-item.claimed { opacity: 0.55; }
+        .reward-item .rv-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+            flex-shrink: 0;
+            background: rgba(255, 183, 77, 0.1);
+            border: 1px solid rgba(255, 183, 77, 0.18);
+        }
+        .reward-item .rv-info { flex: 1; min-width: 0; }
+        .reward-item .rv-name { font-size: 14px; font-weight: 600; }
+        .reward-item .rv-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 3px;
+        }
+        .reward-item .rv-coins {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffb74d;
+            margin-top: 4px;
+        }
+        .reward-item .rv-btn {
+            flex-shrink: 0;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #1a2030;
+            background: linear-gradient(135deg, #ffd28a, #ffb74d);
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 14px rgba(255, 183, 77, 0.3);
+            transition: transform 0.15s;
+        }
+        .reward-item .rv-btn:active { transform: scale(0.93); }
+        .reward-item .rv-btn.done {
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.4);
+            box-shadow: none;
+            cursor: default;
+        }
+
+        /* 周柱状图 */
+        .week-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 168px;
+            padding: 4px 6px 0;
+            position: relative;
+        }
+        .week-chart .goal-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(109, 213, 237, 0.35);
+            border-top: 1px dashed rgba(109, 213, 237, 0.4);
+            z-index: 1;
+        }
+        .week-chart .goal-line::after {
+            content: "目标 23:30";
+            position: absolute;
+            right: 0;
+            top: -16px;
+            font-size: 9.5px;
+            color: rgba(109, 213, 237, 0.75);
+            letter-spacing: 0.3px;
+        }
+        .week-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+        .week-col .w-time {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .week-col .w-bar {
+            width: 16px;
+            border-radius: 7px 7px 3px 3px;
+            min-height: 4px;
+            transition: height 0.5s ease;
+        }
+        .week-col.ok .w-bar {
+            background: linear-gradient(180deg, #7ce8ff, #6dd5ed);
+            box-shadow: 0 0 10px rgba(109, 213, 237, 0.35);
+        }
+        .week-col.bad .w-bar {
+            background: linear-gradient(180deg, #ffc98a, #ffb74d);
+            box-shadow: 0 0 10px rgba(255, 183, 77, 0.3);
+        }
+        .week-col .w-day {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 6px;
+        }
+        .week-col .w-mark {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        .week-col.ok .w-mark { color: #6dd5ed; }
+        .week-col.bad .w-mark { color: #ffb74d; }
+
+        .week-legend {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .week-legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .week-legend i {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .week-legend i.ok { background: #6dd5ed; }
+        .week-legend i.bad { background: #ffb74d; }
+
+        /* 月度热力图 */
+        .heat-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .heat-cell {
+            aspect-ratio: 1;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9.5px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .heat-cell.empty { background: transparent; border-color: transparent; }
+        .heat-cell.ok {
+            background: rgba(109, 213, 237, 0.28);
+            border-color: rgba(109, 213, 237, 0.35);
+            color: #bff0fb;
+        }
+        .heat-cell.ok-strong {
+            background: linear-gradient(135deg, rgba(122, 169, 255, 0.5), rgba(109, 213, 237, 0.4));
+            border-color: rgba(122, 169, 255, 0.6);
+            color: #fff;
+        }
+        .heat-cell.bad {
+            background: rgba(255, 107, 138, 0.18);
+            border-color: rgba(255, 107, 138, 0.3);
+            color: rgba(255, 183, 208, 0.85);
+        }
+        .heat-cell.today {
+            outline: 2px solid #ffb74d;
+            outline-offset: 1px;
+        }
+        .heat-legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+        }
+        .heat-legend i {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+        .heat-legend i.none { background: rgba(255, 255, 255, 0.06); }
+        .heat-legend i.bad { background: rgba(255, 107, 138, 0.35); }
+        .heat-legend i.ok { background: rgba(109, 213, 237, 0.45); }
+        .heat-legend i.good { background: #7aa9ff; }
+
+        .month-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .month-stat {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 10px 6px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .month-stat .ms-num {
+            font-size: 17px;
+            font-weight: 700;
+        }
+        .month-stat .ms-num.c-cyan { color: #6dd5ed; }
+        .month-stat .ms-num.c-purple { color: #b388ff; }
+        .month-stat .ms-num.c-gold { color: #ffb74d; }
+        .month-stat .ms-lab {
+            font-size: 10.5px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 3px;
+        }
+
+        /* ============ 通用小工具（新增） ============ */
+        .pill-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pill {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 12px;
+            border-radius: 30px;
+        }
+        .coin-pop {
+            animation: coin-pop 0.45s ease;
+        }
+        @keyframes coin-pop {
+            0% { transform: scale(1.35); color: #fff; text-shadow: 0 0 24px rgba(255, 183, 77, 1); }
+            100% { transform: scale(1); }
+        }
+        .flash-update {
+            animation: flash-glow 0.3s ease;
+        }
+        @keyframes flash-glow {
+            0% { text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); }
+            100% { text-shadow: none; }
+        }
+        ::-webkit-scrollbar { width: 0; height: 0; }
+
+        /* log 输出区域（调试用，可隐藏） */
+        #log {
+            max-height: 80px;
+            overflow-y: auto;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        @media (max-width: 380px) {
+            .metric-card .value { font-size: 24px; }
+            .report-item .r-value { font-size: 17px; }
+            .card { padding: 14px 14px 16px; }
+            .hero h2 { font-size: 26px; }
+        }
+        @media (min-width: 500px) {
+            body { padding: 0; }
+            .app { max-width: 460px; }
+            .tabbar { max-width: 460px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+
+        <!-- ================= 首页：赛博自律哨兵 ================= -->
+        <section class="page active" id="page-home">
+            <div class="header">
+                <h1>赛博自律哨兵</h1>
+                <span class="time-badge" id="liveTimeHome">--:--</span>
+            </div>
+
+            <!-- Hero -->
+            <div class="hero">
+                <div class="badge"><span class="pulse"></span>SINAN SLE · 星闪在线</div>
+                <h2>赛博自律哨兵</h2>
+                <div class="slogan">把自律变成游戏，把解压变成按键</div>
+                <div class="device">
+                    <div class="ring"></div>
+                    <div class="shell"></div>
+                    <div class="screen">
+                        <span class="scr-time" id="heroClock">23:30</span>
+                        <span class="scr-timer">番茄钟 25:00</span>
+                        <span class="scr-emoji">🛰️</span>
+                    </div>
+                    <div class="key k1"></div>
+                    <div class="key k2"></div>
+                    <div class="key k3"></div>
+                </div>
+                <div class="stats-strip">
+                    <div class="s-item">
+                        <div class="s-num"><em id="homeCoins">1280</em></div>
+                        <div class="s-lab">金币</div>
+                    </div>
+                    <div class="s-item">
+                        <div class="s-num" id="homeStreak">128 <em>天</em></div>
+                        <div class="s-lab">连续自律</div>
+                    </div>
+                    <div class="s-item">
+                        <div class="s-num" id="homeOnline">3 <em>人</em></div>
+                        <div class="s-lab">同桌在线</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 双模式 -->
+            <div class="dual-grid">
+                <div class="mode-card day">
+                    <div class="m-icon">🌞</div>
+                    <div class="m-title">日间潮玩</div>
+                    <div class="m-desc">番茄钟专注计时 · 青轴按键解压 · 像素皮肤工坊</div>
+                    <div>
+                        <span class="m-tag hl">25 分钟专注</span>
+                        <span class="m-tag">双击开始</span>
+                    </div>
+                </div>
+                <div class="mode-card night">
+                    <div class="m-icon">🌙</div>
+                    <div class="m-title">夜间守护</div>
+                    <div class="m-desc">侧翻 90° 自动切换 · 毫米波无感监测 · 满 6h 领金币</div>
+                    <div>
+                        <span class="m-tag hl">60GHz 雷达</span>
+                        <span class="m-tag">无感监测</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 今日自律状态 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#2ee6a8;"></span>
+                    今日自律状态
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div>
+                        <div style="font-size:16px;font-weight:600;" id="homeTodayStatus">📡 夜间守护进行中</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:5px;" id="homeTodaySub">已连续监测 4 小时 20 分 · 今日目标达成</div>
+                    </div>
+                    <span class="f-status sleep" style="font-size:12px;">守护中</span>
+                </div>
+                <div class="group-progress">
+                    <div class="gp-head">
+                        <span>今日监测进度</span>
+                        <strong id="homeProgressText">72%</strong>
+                    </div>
+                    <div class="gp-bar"><span id="homeProgressBar" style="width:72%;"></span></div>
+                </div>
+            </div>
+
+            <!-- 技术亮点 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#6dd5ed;"></span>
+                    为什么是哨兵
+                </div>
+                <div class="tech-list">
+                    <div class="tech-item t-radar">
+                        <div class="t-icon">📡</div>
+                        <div class="t-body">
+                            <div class="t-title">毫米波无感监测</div>
+                            <div class="t-desc">60GHz 雷达捕捉呼吸与体动，不发光、不出声、不成像，非接触守护整夜睡眠。</div>
+                            <div class="t-metrics"><span>非接触</span><span>不采集音视频</span><span>隐私友好</span></div>
+                        </div>
+                    </div>
+                    <div class="tech-item t-link">
+                        <div class="t-icon">⚡</div>
+                        <div class="t-body">
+                            <div class="t-title">星闪 SLE 精准连接</div>
+                            <div class="t-desc">国产星闪通信，桌面多设备共存不掉线，青轴按键微秒级响应。</div>
+                            <div class="t-metrics"><span>功耗 -60%</span><span>时延 250μs</span><span>抗干扰 +7dB</span><span>256 台并发</span></div>
+                        </div>
+                    </div>
+                    <div class="tech-item t-sec">
+                        <div class="t-icon">🔐</div>
+                        <div class="t-body">
+                            <div class="t-title">隐私可控 · 双端分层</div>
+                            <div class="t-desc">物理翻转自主授权，监测权归你；SM4 全链路加密，原始信号不出设备。</div>
+                            <div class="t-metrics"><span>翻转授权</span><span>SM4 加密</span><span>数据主权归学生</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-row">
+                <button class="cta cta-primary" onclick="showTab('monitor')">📡 实时监测</button>
+                <button class="cta cta-ghost" onclick="showTab('reward')">🎁 领奖励</button>
+            </div>
+            <div class="footer-note">🛰️ 星闪精准连接 · 毫米波感知 · 自律看得见</div>
+        </section>
+
+        <!-- ================= 子页面：实时监测（原 sleep.html 全部内容） ================= -->
+        <section class="page" id="page-monitor">
+            <!-- 连接控制区 -->
+            <div class="control-bar">
+                <select id="devList">
+                    <option value="device_001">设备 001</option>
+                    <option value="device_002">设备 002</option>
+                    <option value="0024a5f0dba4" selected>0024a5f0dba4</option>
+                </select>
+                <button onclick="mqtt_conn()">连接</button>
+                <button onclick="mqtt_disc()">断开</button>
+                <span class="conn-status" id="conn_sts">未连接</span>
+            </div>
+
+            <!-- 头部 -->
+            <div class="header">
+                <h1>📡 实时监测</h1>
+                <span class="time-badge" id="liveTime">--:--</span>
+            </div>
+
+            <!-- 三指标 -->
+            <div class="metrics-row">
+                <div class="metric-card breath">
+                    <div class="glow"></div>
+                    <span class="icon-wrap">🌬️</span>
+                    <div class="value" id="breathValue">16 <span class="unit">/min</span></div>
+                    <div class="label">呼吸率</div>
+                </div>
+                <div class="metric-card heart">
+                    <div class="glow"></div>
+                    <span class="icon-wrap">❤️</span>
+                    <div class="value" id="heartValue">72 <span class="unit">bpm</span></div>
+                    <div class="label">心率</div>
+                </div>
+                <div class="metric-card sleep">
+                    <div class="glow"></div>
+                    <span class="icon-wrap">😴</span>
+                    <div class="value" id="sleepValue">6.5 <span class="unit">h</span></div>
+                    <div class="label">总睡眠</div>
+                </div>
+            </div>
+
+            <!-- 睡眠状态 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#b388ff;"></span>
+                    当前睡眠状态
+                </div>
+                <div class="sleep-status">
+                    <span class="status-label">🌙 阶段</span>
+                    <span class="status-value">
+                        <span id="sleepStageText">深度睡眠</span>
+                        <span class="indicator deep" id="sleepIndicator"></span>
+                    </span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:rgba(255,255,255,0.3);padding:0 4px;">
+                    <span>😴 深度</span><span>🌊 浅睡</span><span>💭 REM</span><span>👀 清醒</span>
+                </div>
+                <div style="margin-top:8px;height:6px;border-radius:6px;background:rgba(255,255,255,0.06);overflow:hidden;display:flex;">
+                    <span style="width:32%;height:100%;background:#b388ff;border-radius:6px 0 0 6px;"></span>
+                    <span style="width:38%;height:100%;background:#6dd5ed;"></span>
+                    <span style="width:20%;height:100%;background:#ffb74d;"></span>
+                    <span style="width:10%;height:100%;background:#ff6b8a;border-radius:0 6px 6px 0;"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:rgba(255,255,255,0.2);">
+                    <span>32%</span><span>38%</span><span>20%</span><span>10%</span>
+                </div>
+            </div>
+
+            <!-- 睡眠报告 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#ffb74d;"></span>
+                    睡眠质量报告
+                </div>
+                <div class="report-grid">
+                    <div class="report-item">
+                        <div class="r-label">🛏️ 上床时间</div>
+                        <div class="r-value" id="bedTime">23:15</div>
+                        <div class="r-sub">昨晚</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="r-label">⏰ 起床时间</div>
+                        <div class="r-value" id="wakeTime">07:30</div>
+                        <div class="r-sub">今早</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="r-label">🚶 离床次数</div>
+                        <div class="r-value" id="leaveCount">3 <span class="r-unit">次</span></div>
+                        <div class="r-sub">夜间</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="r-label">⏱️ 离床时间</div>
+                        <div class="r-value" id="leaveTime">12 <span class="r-unit">min</span></div>
+                        <div class="r-sub">总时长</div>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.05);font-size:13px;color:rgba(255,255,255,0.4);">
+                    <span>💤 睡眠效率 <strong style="color:#e8edf5;font-weight:500;" id="sleepEfficiency">92%</strong></span>
+                    <span>📊 评分 <strong style="color:#e8edf5;font-weight:500;" id="sleepScore">87</strong></span>
+                </div>
+            </div>
+
+            <!-- 调试日志 (默认隐藏) -->
+            <div id="log"></div>
+
+            <div class="footer-note">
+                🧘 数据实时监测 · 最后更新 <span id="lastUpdate">刚刚</span>
+            </div>
+        </section>
+
+        <!-- ================= 子页面：在线好友 ================= -->
+        <section class="page" id="page-friends">
+            <div class="header">
+                <h1>👥 在线好友</h1>
+                <span class="time-badge" id="liveTimeFriends">--:--</span>
+            </div>
+
+            <!-- 汇总 -->
+            <div class="card friends-summary">
+                <div class="fs-ring">
+                    <svg width="58" height="58" viewBox="0 0 58 58">
+                        <circle cx="29" cy="29" r="24" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="5"/>
+                        <circle cx="29" cy="29" r="24" fill="none" stroke="#6dd5ed" stroke-width="5"
+                                stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="37.7" id="fsRingArc"/>
+                    </svg>
+                    <span class="fs-num" id="fsOnlineNum">3</span>
+                </div>
+                <div class="fs-body">
+                    <div class="fs-title">赛博同桌 · <strong id="fsOnlineText" style="color:#6dd5ed;">3</strong> 人自律中</div>
+                    <div class="fs-sub" id="fsSubText">今晚已有 <strong>2</strong> 人准点入睡 · 继续加油</div>
+                </div>
+            </div>
+
+            <!-- 集体专注进度 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#6dd5ed;"></span>
+                    集体专注进度
+                </div>
+                <div class="group-progress" style="margin-top:0;border-top:none;padding-top:0;">
+                    <div class="gp-head">
+                        <span>今日同桌平均专注</span>
+                        <strong id="gpText">68%</strong>
+                    </div>
+                    <div class="gp-bar"><span id="gpBar" style="width:68%;"></span></div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:10px;">📶 星闪近场感知 · 安静陪伴，不聊天不加好友</div>
+                </div>
+            </div>
+
+            <!-- 好友列表 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#b388ff;"></span>
+                    自律伙伴
+                </div>
+                <div class="friend-list" id="friendList"></div>
+            </div>
+
+            <div class="footer-note">🤝 星闪近场感知 · 每天一起准点入睡</div>
+        </section>
+
+        <!-- ================= 子页面：自律奖励 ================= -->
+        <section class="page" id="page-reward">
+            <div class="header">
+                <h1>🎁 自律奖励</h1>
+                <span class="time-badge" id="liveTimeReward">--:--</span>
+            </div>
+
+            <!-- 个人卡片 -->
+            <div class="card me-card">
+                <svg class="pixel-avatar" viewBox="0 0 48 48" width="76" height="76" aria-label="我的像素头像">
+                    <defs>
+                        <linearGradient id="avBg" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#3a4366"/>
+                            <stop offset="100%" stop-color="#141a33"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="0" y="0" width="48" height="48" rx="12" fill="url(#avBg)"/>
+                    <rect x="12" y="7" width="24" height="7" fill="#2b2f4a"/>
+                    <rect x="10" y="12" width="28" height="5" fill="#2b2f4a"/>
+                    <rect x="14" y="17" width="20" height="19" rx="3" fill="#f2c49b"/>
+                    <rect x="10" y="15" width="28" height="4" fill="#6dd5ed"/>
+                    <rect x="15" y="21" width="18" height="2" fill="#7aa9ff"/>
+                    <rect x="16" y="23" width="7" height="6" rx="1" fill="#7aa9ff"/>
+                    <rect x="25" y="23" width="7" height="6" rx="1" fill="#7aa9ff"/>
+                    <rect x="18" y="24" width="3" height="3" fill="#dff0ff"/>
+                    <rect x="27" y="24" width="3" height="3" fill="#dff0ff"/>
+                    <rect x="15" y="29" width="3" height="3" fill="#ffb0c0"/>
+                    <rect x="30" y="29" width="3" height="3" fill="#ffb0c0"/>
+                    <rect x="19" y="31" width="10" height="4" rx="1.5" fill="#c97b63"/>
+                    <rect x="14" y="36" width="20" height="1.5" fill="rgba(255,255,255,0.12)"/>
+                </svg>
+                <div class="me-info">
+                    <div class="me-name" id="meName">赛博自律者</div>
+                    <div><span class="me-level" id="meLevel">🥈 白银自律官</span></div>
+                    <div class="me-streak" id="meStreakText">🔥 连续自律 <strong>128</strong> 天</div>
+                </div>
+                <div class="me-coins">
+                    <div class="mc-num" id="meCoinsNum">1280</div>
+                    <div class="mc-lab">🪙 金币</div>
+                </div>
+            </div>
+
+            <!-- 可领取奖励 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#ffb74d;"></span>
+                    奖励中心
+                </div>
+                <div class="reward-list" id="rewardList"></div>
+            </div>
+
+            <!-- 近一周 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#6dd5ed;"></span>
+                    近一周自律情况
+                </div>
+                <div class="week-chart" id="weekChart"></div>
+                <div class="week-legend">
+                    <span><i class="ok"></i>准点入睡（≤23:30）</span>
+                    <span><i class="bad"></i>熬夜</span>
+                </div>
+            </div>
+
+            <!-- 近一月 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="dot" style="background:#b388ff;"></span>
+                    8 月自律日历
+                </div>
+                <div class="heat-grid" id="heatGrid"></div>
+                <div class="heat-legend">
+                    <span>少</span><i class="none"></i><i class="bad"></i><i class="ok"></i><i class="good"></i><span>多</span>
+                </div>
+                <div class="month-stats">
+                    <div class="month-stat">
+                        <div class="ms-num c-cyan" id="mOkDays">22</div>
+                        <div class="ms-lab">准点天数 / 30</div>
+                    </div>
+                    <div class="month-stat">
+                        <div class="ms-num c-purple" id="mAvgTime">23:38</div>
+                        <div class="ms-lab">平均入睡</div>
+                    </div>
+                    <div class="month-stat">
+                        <div class="ms-num c-gold" id="mStreak">12</div>
+                        <div class="ms-lab">最长连续达标</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-note">🎯 金币只奖励"坚持"，不与睡得香不香挂钩</div>
+        </section>
+
+        <!-- ================= 底部导航 ================= -->
+        <nav class="tabbar">
+            <div class="tab active" data-tab="home" onclick="showTab('home')">
+                <span class="icon">🏠</span>首页
+            </div>
+            <div class="tab" data-tab="monitor" onclick="showTab('monitor')">
+                <span class="icon">📡</span>监测
+            </div>
+            <div class="tab" data-tab="friends" onclick="showTab('friends')">
+                <span class="icon">👥</span>好友
+            </div>
+            <div class="tab" data-tab="reward" onclick="showTab('reward')">
+                <span class="icon">🎁</span>奖励
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ================================================================
+            // 一、Tab 切换
+            // ================================================================
+            function showTab(name) {
+                document.querySelectorAll('.page').forEach(function(p) {
+                    p.classList.toggle('active', p.id === 'page-' + name);
+                });
+                document.querySelectorAll('.tab').forEach(function(t) {
+                    t.classList.toggle('active', t.dataset.tab === name);
+                });
+                window.scrollTo(0, 0);
+                if (name === 'friends') renderFriends();
+                if (name === 'reward') renderRewardPage();
+            }
+            window.showTab = showTab;
+
+            // ================================================================
+            // 二、实时监测（原 sleep.html 全部逻辑，原样保留）
+            // ================================================================
+            const els = {
+                breath: document.getElementById('breathValue'),
+                heart: document.getElementById('heartValue'),
+                sleep: document.getElementById('sleepValue'),
+                stageText: document.getElementById('sleepStageText'),
+                indicator: document.getElementById('sleepIndicator'),
+                bedTime: document.getElementById('bedTime'),
+                wakeTime: document.getElementById('wakeTime'),
+                leaveCount: document.getElementById('leaveCount'),
+                leaveTime: document.getElementById('leaveTime'),
+                efficiency: document.getElementById('sleepEfficiency'),
+                score: document.getElementById('sleepScore'),
+                lastUpdate: document.getElementById('lastUpdate'),
+                liveTime: document.getElementById('liveTime'),
+                connSts: document.getElementById('conn_sts'),
+            };
+
+            const state = {
+                breath: 16,
+                heart: 72,
+                sleepHours: 6.5,
+                stageIndex: 0,
+                stageNames: ['深度睡眠', '浅度睡眠', 'REM睡眠', '清醒'],
+                stageClasses: ['deep', 'light', 'rem', 'awake'],
+                bedTime: '23:15',
+                wakeTime: '07:30',
+                leaveCount: 3,
+                leaveMinutes: 12,
+                efficiency: 92,
+                score: 87,
+                connected: false,
+            };
+
+            function pad(n) { return String(n).padStart(2, '0'); }
+            function formatTime(h, m) { return pad(h) + ':' + pad(m); }
+
+            function render() {
+                els.breath.innerHTML = state.breath + ' <span class="unit">/min</span>';
+                els.heart.innerHTML = state.heart + ' <span class="unit">bpm</span>';
+                els.sleep.innerHTML = state.sleepHours.toFixed(1) + ' <span class="unit">h</span>';
+
+                const idx = state.stageIndex;
+                els.stageText.textContent = state.stageNames[idx];
+                els.indicator.className = 'indicator ' + state.stageClasses[idx];
+
+                els.bedTime.textContent = state.bedTime;
+                els.wakeTime.textContent = state.wakeTime;
+                els.leaveCount.innerHTML = state.leaveCount + ' <span class="r-unit">次</span>';
+                els.leaveTime.innerHTML = state.leaveMinutes + ' <span class="r-unit">min</span>';
+                els.efficiency.textContent = state.efficiency + '%';
+                els.score.textContent = state.score;
+
+                const now = new Date();
+                els.lastUpdate.textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
+            }
+
+            let simulateTimer = null;
+            function startSimulate() {
+                if (simulateTimer) clearInterval(simulateTimer);
+                simulateTimer = setInterval(function() {
+                    if (state.connected) return;
+                    state.breath = Math.round(14 + Math.random() * 6);
+                    state.heart = Math.round(65 + Math.random() * 17);
+                    state.sleepHours = 6.0 + Math.random() * 1.8;
+                    const roll = Math.random();
+                    if (roll < 0.4) state.stageIndex = 0;
+                    else if (roll < 0.7) state.stageIndex = 1;
+                    else if (roll < 0.9) state.stageIndex = 2;
+                    else state.stageIndex = 3;
+                    state.leaveCount = Math.floor(1 + Math.random() * 5);
+                    state.leaveMinutes = Math.round(5 + Math.random() * 20);
+                    state.efficiency = Math.round(84 + Math.random() * 13);
+                    state.score = Math.round(75 + Math.random() * 20);
+                    const bedH = 22 + Math.floor(Math.random() * 2);
+                    const bedM = Math.floor(Math.random() * 60);
+                    state.bedTime = formatTime(bedH, bedM);
+                    const wakeH = 6 + Math.floor(Math.random() * 3);
+                    const wakeM = Math.floor(Math.random() * 60);
+                    state.wakeTime = formatTime(wakeH, wakeM);
+                    render();
+                    document.querySelectorAll('.metric-card .value, .report-item .r-value').forEach(function(el) {
+                        el.classList.remove('flash-update');
+                        void el.offsetWidth;
+                        el.classList.add('flash-update');
+                    });
+                }, 3000);
+            }
+
+            function updateStateFromPayload(payload) {
+                try {
+                    console.log(payload);
+                    var str = JSON.stringify(payload.services[0].properties);
+                    console.log(str);
+                    const props = payload.services[0].properties;
+                    if (props.cmd == "8102")     state.breath = props.result;
+                    if (props.cmd == "8502")     state.heart = props.result;
+                    if (props.breath_rate !== undefined) state.breath = props.breath_rate;
+                    if (props.heart_rate !== undefined) state.heart = props.heart_rate;
+                    if (props.sleep_hours !== undefined) state.sleepHours = props.sleep_hours;
+                    if (props.sleep_stage !== undefined) state.stageIndex = props.sleep_stage;
+                    if (props.bed_time) state.bedTime = props.bed_time;
+                    if (props.wake_time) state.wakeTime = props.wake_time;
+                    if (props.leave_count !== undefined) state.leaveCount = props.leave_count;
+                    if (props.leave_minutes !== undefined) state.leaveMinutes = props.leave_minutes;
+                    if (props.efficiency !== undefined) state.efficiency = props.efficiency;
+                    if (props.score !== undefined) state.score = props.score;
+                    render();
+                    document.querySelectorAll('.metric-card .value, .report-item .r-value').forEach(function(el) {
+                        el.classList.remove('flash-update');
+                        void el.offsetWidth;
+                        el.classList.add('flash-update');
+                    });
+                } catch (e) {
+                    console.warn('解析数据失败', e);
+                }
+            }
+
+            var socket, deviceId;
+            var rid = 1;
+            var topic, payload;
+
+            function getDevice() {
+                var obj = document.getElementById('devList');
+                return obj.options[obj.selectedIndex].value;
+            }
+
+            function mqtt_conn() {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    els.connSts.innerText = '已连接';
+                    return;
+                }
+                var host = "wss://mqtt.wit-iot.com/";
+                try {
+                    deviceId = getDevice();
+                    socket = new WebSocket(host);
+                    socket.onopen = function (msg) {
+                        els.connSts.innerText = "连接成功";
+                        state.connected = true;
+                        if (simulateTimer) clearInterval(simulateTimer);
+                        topic = "$dev/" + deviceId + "/rpt/up";
+                        var msgObj = { "cmd": "conn", "topic": topic, "payload": deviceId };
+                        socket.send(JSON.stringify(msgObj));
+                        document.getElementById('log').style.display = 'block';
+                        logMsg("=== 连接成功，订阅: " + topic);
+                    };
+                    socket.onmessage = function (msg) {
+                        logMsg("<== " + msg.data);
+                        try {
+                            var msgObj = JSON.parse(msg.data);
+                            if (msgObj.Cmd === "mqtt") {
+                                var payload = JSON.parse(msgObj.Payload);
+                                if (payload && payload.services && payload.services.length) {
+                                    updateStateFromPayload(payload);
+                                    var tm0 = payload.services[0].event_time.split('T')[1];
+                                    var tm = tm0.substr(0,2)+':'+tm0.substr(2,2)+':'+tm0.substr(4,2);
+                                    var str = JSON.stringify(payload.services[0].properties);
+                                    logMsg(tm + ' >> ' + str);
+                                }
+                            }
+                        } catch (e) {
+                            logMsg('解析错误: ' + e);
+                        }
+                    };
+                    socket.onclose = function (msg) {
+                        els.connSts.innerText = "断开连接";
+                        state.connected = false;
+                        logMsg("xxx 断开连接");
+                    };
+                } catch (ex) {
+                    logMsg('连接异常: ' + ex);
+                }
+            }
+
+            function mqtt_disc() {
+                if (socket) {
+                    socket.close();
+                    socket = null;
+                }
+                els.connSts.innerText = "已断开";
+                state.connected = false;
+            }
+
+            function logMsg(msg) {
+                var div = document.getElementById('log');
+                div.innerHTML += "<br>" + msg;
+                div.scrollTop = div.scrollHeight;
+            }
+
+            // ================================================================
+            // 三、全局时钟（同步到所有页面）
+            // ================================================================
+            const timeIds = ['liveTime', 'liveTimeHome', 'liveTimeFriends', 'liveTimeReward'];
+            function updateClock() {
+                const now = new Date();
+                const t = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+                timeIds.forEach(function(id) {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = t;
+                });
+                const hero = document.getElementById('heroClock');
+                if (hero) hero.textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
+            }
+
+            // ================================================================
+            // 四、在线好友页
+            // ================================================================
+            const friendData = [
+                { name: '我', emoji: '🤖', grad: 'linear-gradient(135deg,#3a4366,#141a33)', days: 128, sleep: '23:30', status: '自律中', stype: 'live', online: true, me: true, focus: 45 },
+                { name: '林小北', emoji: '🦊', grad: 'linear-gradient(135deg,#ff9a56,#c2452d)', days: 128, sleep: '23:30', status: '睡眠中', stype: 'sleep', online: true, focus: 0 },
+                { name: '苏子衿', emoji: '🐱', grad: 'linear-gradient(135deg,#ffb0c0,#d45d7a)', days: 96, sleep: '23:45', status: '专注 18/25', stype: 'focus', online: true, focus: 72 },
+                { name: '陆之遥', emoji: '🐼', grad: 'linear-gradient(135deg,#b0b8d8,#4a5072)', days: 73, sleep: '23:20', status: '自律中', stype: 'live', online: true, focus: 38 },
+                { name: '顾星河', emoji: '🐸', grad: 'linear-gradient(135deg,#8ce99a,#2f9e44)', days: 51, sleep: '23:55', status: '专注 7/25', stype: 'focus', online: true, focus: 28 },
+                { name: '陈思睿', emoji: '🦉', grad: 'linear-gradient(135deg,#b197fc,#6741d9)', days: 38, sleep: '00:10', status: '离线', stype: 'off', online: false, focus: 0 },
+            ];
+
+            function renderFriends() {
+                const list = document.getElementById('friendList');
+                list.innerHTML = '';
+                const online = friendData.filter(function(f) { return f.online; }).length;
+                document.getElementById('fsOnlineNum').textContent = online;
+                document.getElementById('fsOnlineText').textContent = online;
+                document.getElementById('fsRingArc').setAttribute('stroke-dashoffset', 150.8 * (1 - online / friendData.length));
+                const sleepers = friendData.filter(function(f) { return f.stype === 'sleep'; }).length;
+                document.getElementById('fsSubText').innerHTML = '今晚已有 <strong>' + sleepers + '</strong> 人准点入睡 · 星闪近场发现 ' + friendData.length + ' 台设备';
+
+                const focusSum = friendData.reduce(function(s, f) { return s + f.focus; }, 0);
+                const focusAvg = Math.round(focusSum / Math.max(1, online));
+                document.getElementById('gpText').textContent = focusAvg + '%';
+                document.getElementById('gpBar').style.width = focusAvg + '%';
+                document.getElementById('homeOnline').innerHTML = online + ' <em>人</em>';
+
+                friendData.forEach(function(f) {
+                    const item = document.createElement('div');
+                    item.className = 'friend-item' + (f.me ? ' me' : '');
+                    item.innerHTML =
+                        '<div class="avatar" style="background:' + f.grad + ';">' + f.emoji +
+                            '<span class="dot-online' + (f.online ? '' : ' off') + '"></span>' +
+                        '</div>' +
+                        '<div class="f-info">' +
+                            '<div class="f-top">' +
+                                '<span class="f-name">' + f.name + (f.me ? '<span class="me-tag">我</span>' : '') + '</span>' +
+                                '<span class="f-streak">🔥 连续自律 ' + f.days + ' 天</span>' +
+                            '</div>' +
+                            '<div class="f-sub">' +
+                                '<span class="f-sleep">🌙 每天 ' + f.sleep + ' 入睡</span>' +
+                            '</div>' +
+                        '</div>' +
+                        '<span class="f-status ' + f.stype + '">' + f.status + '</span>';
+                    list.appendChild(item);
+                });
+            }
+
+            // 好友页轻量"实时感"：每 10s 微调专注进度
+            setInterval(function() {
+                if (!document.getElementById('page-friends').classList.contains('active')) return;
+                friendData.forEach(function(f) {
+                    if (f.stype === 'focus') {
+                        f.focus = Math.min(100, f.focus + Math.round(Math.random() * 4));
+                    }
+                });
+                renderFriends();
+            }, 10000);
+
+            // ================================================================
+            // 五、自律奖励页
+            // ================================================================
+            const REWARD_KEY = 'sentinel_rewards_v1';
+            let coins = 1280;
+            const baseCoins = 1280;
+
+            const rewards = [
+                { id: 'daily', icon: '✅', name: '每日自律签到', desc: '保持记录，今日已打卡', coins: 10 },
+                { id: 'night', icon: '🌙', name: '夜间守护达成', desc: '侧翻监测满 6 小时', coins: 50 },
+                { id: 'streak7', icon: '🔥', name: '连续自律 7 天', desc: '本周 7 天准点入睡', coins: 100 },
+                { id: 'month', icon: '🏆', name: '月度全勤勋章', desc: '8 月 30 天全部达标', coins: 300 },
+            ];
+
+            // 近一周（8/25 - 8/31）：入睡时间，目标 23:30
+            const weekData = [
+                { d: '8/25', t: '23:15', ok: true },
+                { d: '8/26', t: '23:40', ok: false },
+                { d: '8/27', t: '23:28', ok: true },
+                { d: '8/28', t: '23:35', ok: false },
+                { d: '8/29', t: '23:22', ok: true },
+                { d: '8/30', t: '23:30', ok: true },
+                { d: '8/31', t: '23:18', ok: true },
+            ];
+            // 8 月 31 天达标表（1=准点达标，0=熬夜）
+            const monthOk = [
+                0,0,1,1,1,0,1, 1,1,1,0,1,1,0,
+                1,1,1,0,1,1,1, 1,0,1,1,1,1,1,
+                0,1,1
+            ];
+
+            function loadClaimed() {
+                try {
+                    const raw = localStorage.getItem(REWARD_KEY);
+                    if (raw) {
+                        const obj = JSON.parse(raw);
+                        if (typeof obj.coins === 'number') coins = obj.coins;
+                        return obj.claimed || {};
+                    }
+                } catch (e) {}
+                return {};
+            }
+            let claimed = loadClaimed();
+            function saveClaimed() {
+                try {
+                    localStorage.setItem(REWARD_KEY, JSON.stringify({ coins: coins, claimed: claimed }));
+                } catch (e) {}
+            }
+
+            function levelName(c) {
+                if (c >= 3000) return '🥇 星闪守护者';
+                if (c >= 1500) return '🥇 黄金哨兵';
+                if (c >= 500)  return '🥈 白银自律官';
+                return '🥉 见习哨兵';
+            }
+
+            function renderRewardPage() {
+                const coinsEl = document.getElementById('meCoinsNum');
+                coinsEl.textContent = coins;
+                document.getElementById('homeCoins').textContent = coins;
+                document.getElementById('meLevel').textContent = levelName(coins);
+
+                // 奖励列表
+                const list = document.getElementById('rewardList');
+                list.innerHTML = '';
+                rewards.forEach(function(r) {
+                    const isClaimed = !!claimed[r.id];
+                    const item = document.createElement('div');
+                    item.className = 'reward-item' + (isClaimed ? ' claimed' : '');
+                    item.innerHTML =
+                        '<div class="rv-icon">' + r.icon + '</div>' +
+                        '<div class="rv-info">' +
+                            '<div class="rv-name">' + r.name + '</div>' +
+                            '<div class="rv-desc">' + r.desc + '</div>' +
+                            '<div class="rv-coins">+' + r.coins + ' 金币</div>' +
+                        '</div>' +
+                        '<button class="rv-btn' + (isClaimed ? ' done' : '') + '" data-id="' + r.id + '">' +
+                            (isClaimed ? '已领取' : '领取') +
+                        '</button>';
+                    item.querySelector('.rv-btn').addEventListener('click', function() {
+                        if (claimed[r.id]) return;
+                        claimed[r.id] = true;
+                        coins += r.coins;
+                        saveClaimed();
+                        renderRewardPage();
+                        // 金币动画
+                        coinsEl.classList.remove('coin-pop');
+                        void coinsEl.offsetWidth;
+                        coinsEl.classList.add('coin-pop');
+                    });
+                    list.appendChild(item);
+                });
+
+                renderWeekChart();
+                renderHeatGrid();
+            }
+
+            function renderWeekChart() {
+                const chart = document.getElementById('weekChart');
+                chart.innerHTML = '';
+                // 目标线高度：24:00-23:30 = 30min / 90min 基准(22:30~24:00)
+                chart.innerHTML = '<div class="goal-line" style="bottom:' + (30 / 90 * 100) + '%;"></div>';
+                weekData.forEach(function(w) {
+                    const col = document.createElement('div');
+                    col.className = 'week-col ' + (w.ok ? 'ok' : 'bad');
+                    const hm = w.t.split(':');
+                    const mins = parseInt(hm[0]) * 60 + parseInt(hm[1]);
+                    const hPct = Math.max(4, Math.round((24 * 60 - mins) / 90 * 100));
+                    col.innerHTML =
+                        '<span class="w-time">' + w.t + '</span>' +
+                        '<div class="w-bar" style="height:' + hPct + '%;"></div>' +
+                        '<span class="w-mark">' + (w.ok ? '✓' : '✗') + '</span>' +
+                        '<span class="w-day">' + w.d + '</span>';
+                    chart.appendChild(col);
+                });
+            }
+
+            function renderHeatGrid() {
+                const grid = document.getElementById('heatGrid');
+                grid.innerHTML = '';
+                // 2026-08-01 是周六：周日起始，前面补 5 个上月空格（7/27-7/31 周一~周五）
+                const leading = 5;
+                for (let i = 0; i < leading; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'heat-cell empty';
+                    grid.appendChild(c);
+                }
+                const today = 31;
+                monthOk.forEach(function(ok, i) {
+                    const day = i + 1;
+                    const c = document.createElement('div');
+                    let cls = ok ? 'ok' : 'bad';
+                    if (ok && (day >= 4 && day <= 27) && day % 7 === 0) cls = 'ok-strong';
+                    if (day === today) cls += ' today';
+                    c.className = 'heat-cell ' + cls;
+                    c.textContent = day;
+                    grid.appendChild(c);
+                });
+                const okDays = monthOk.filter(function(v) { return v === 1; }).length;
+                document.getElementById('mOkDays').textContent = okDays;
+            }
+
+            // 月度统计（模拟）
+            document.getElementById('mAvgTime').textContent = '23:38';
+            document.getElementById('mStreak').textContent = '12';
+
+            // ================================================================
+            // 六、初始化
+            // ================================================================
+            render();
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderFriends();
+            renderRewardPage();
+            mqtt_conn();
+
+            window.onbeforeunload = function () {
+                if (socket) socket.close();
+            };
+
+            window.mqtt_conn = mqtt_conn;
+            window.mqtt_disc = mqtt_disc;
+
+            console.log('🛰️ 赛博自律哨兵已启动：首页 / 实时监测 / 在线好友 / 自律奖励');
+        })();
+    </script>
+</body>
+</html>
