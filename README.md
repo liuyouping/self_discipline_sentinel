@@ -1,7 +1,3 @@
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-                        
 # 自律哨兵（Self-Discipline Sentinel）
 
 > 一款基于 OpenHarmony 5.0 + WS63E 开发板的智能设备，集成姿态感知、本地显示与远程 Web 交互。
