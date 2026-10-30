@@ -1,0 +1,62 @@
+LICENSE — 自律哨兵（Self-Discipline Sentinel）
+=============================================
+
+本项目是自研固件 + 第三方组件的集合，不同部分的许可条款各异。
+请在复制、修改或分发对应目录/文件前仔细阅读其声明的许可证。
+
+
+───────────────────────────────────────────────
+一、自研代码（Primary Source）
+───────────────────────────────────────────────
+
+以下文件由「自律哨兵项目组」开发，默认采用 **GNU Affero General Public License v3.0**：
+
+  toy_sle_client/app.c                  — AGPL v3.0
+  toy_sle_client/app.h                  — AGPL v3.0
+  toy_sle_client/BUILD.gn               — AGPL v3.0
+  web_file/sleep.html                   — AGPL v3.0
+
+AGPL v3.0 完整文本见：
+    https://www.gnu.org/licenses/agpl-3.0.txt
+
+
+例外（单独许可）：
+
+  toy_sle_client/app_font.h             — **Apache License 2.0**
+                                          Copyright (c) 2026 自律哨兵.
+
+Apache 2.0 完整文本见：
+    http://www.apache.org/licenses/LICENSE-2.0
+
+
+───────────────────────────────────────────────
+二、第三方组件（Third-Party Components）
+───────────────────────────────────────────────
+
+以下目录包含外部作者的代码，**保持其原始许可证不变**，不属于项目自研范围。
+分发本项目时必须同时满足每个目录对应的许可证要求。
+
+1) toy_sle_client/iot_ex/
+   HiSilicon (Shanghai) Technologies Co., Ltd.
+   许可证：Apache License 2.0
+   来源：OpenHarmony Hi3861 IoT HAL 扩展
+
+2) toy_sle_client/mpu6050/
+   Nanjing Xiaoxiongpai Intelligent Technology Co., Ltd.
+   许可证：Apache License 2.0
+   来源：小熊派 OpenHarmony MPU6050 例程移植
+
+3) toy_sle_client/qrcodegen/
+   Project Nayuki (https://www.nayuki.io/)
+   许可证：MIT License
+   来源：https://github.com/nayuki/QR-Code-generator
+
+
+───────────────────────────────────────────────
+三、版权声明
+───────────────────────────────────────────────
+
+Copyright (c) 2026 自律哨兵项目组.
+
+若需要联系本项目维护者或协商商业授权，
+请通过项目仓库主页上的联系方式。

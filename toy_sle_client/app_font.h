@@ -2,11 +2,11 @@
 /*
  * Copyright (c) 2026 自律哨兵.
  *
- * Licensed under the GNU Affero General Public License, Version 3.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.gnu.org/licenses/agpl-3.0.txt
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-// 圣象·神灯LED心率呼吸血氧关机日历夜
-// 圣(0) 象(1) ·(2) 神(3) 灯(4) L(5) E(6) D(7) 心(8) 率(9) 呼(10) 吸(11) 血(12) 压(13) 关(14) 机(15) 日(16) 历(17) 夜18
 
 // 汉字字模结构（36x36点阵）
 typedef struct {
